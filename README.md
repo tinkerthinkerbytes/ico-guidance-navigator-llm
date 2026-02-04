@@ -6,17 +6,6 @@ Small, local, **bounded RAG** demo to help internal teams **navigate** (not inte
 - producing a **grounded, advisory-only** summary
 - refusing inputs that ask for legal/compliance judgement or “what should we do” actions
 
-## Quickstart
-
-Requirements: **Python 3.10+** (stdlib-only; no external dependencies).
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-
-python3 -m app.cli "What does the guidance say about choosing and documenting a lawful basis?"
-```
-
 ## Non-goals (hard constraints)
 
 This project is **not**:
@@ -49,12 +38,6 @@ Do not treat the corpus as authoritative source text for real decisions.
 python3 -m app.cli "your question"
 ```
 
-## Run tests
-
-```bash
-python3 -m unittest -q
-```
-
 ## Output contract
 
 All outputs conform to the PRS JSON shape:
@@ -67,13 +50,3 @@ All outputs conform to the PRS JSON shape:
   "confidence": "very_low | low | medium | high"
 }
 ```
-
-## Repository layout
-
-- `app/` — pipeline, retriever, refusal logic, output formatting
-- `app/corpus/` — static local corpus used for retrieval
-- `app/tests/` — unit tests for the pipeline contract and safety posture
-
-## License
-
-MIT — see `LICENSE`.
