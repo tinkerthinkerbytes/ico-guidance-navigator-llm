@@ -4,6 +4,8 @@
 
 This repository is a direct continuation of `ico-guidance-navigator`.
 
+This is currently work-in-progress.
+
 Repo 1 is intentionally frozen.
 This repository explores a single, controlled change: the reintroduction of a Large Language Model strictly as a transformation layer, while preserving deterministic behaviour, safety guardrails, and failure-aware design.
 
