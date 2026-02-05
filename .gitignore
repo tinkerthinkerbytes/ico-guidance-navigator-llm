@@ -28,3 +28,6 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+
+# VS Code workspace files
+*.code-workspace

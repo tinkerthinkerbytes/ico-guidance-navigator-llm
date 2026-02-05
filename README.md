@@ -1,5 +1,13 @@
 # ICO Guidance Navigator (Bounded RAG Demo)
 
+## Lineage
+
+This repository is a direct continuation of `ico-guidance-navigator`.
+
+Repo 1 is intentionally frozen.
+This repository explores a single, controlled change: the reintroduction of a Large Language Model strictly as a transformation layer, while preserving deterministic behaviour, safety guardrails, and failure-aware design.
+
+## Description
 Small, local, **bounded RAG** demo to help internal teams **navigate** (not interpret) ICO-style guidance by:
 
 - retrieving relevant guidance sections from a **static local corpus**
