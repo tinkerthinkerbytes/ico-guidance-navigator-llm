@@ -1,62 +1,60 @@
-# ICO Guidance Navigator (Bounded RAG Demo)
+# ICO Guidance Navigator — LLM-Assisted Variant (WIP)
 
-## Lineage
+> **Status:** Work in progress
 
-This repository is a direct continuation of `ico-guidance-navigator`.
+This repository is a continuation of the deterministic ICO guidance navigator built in Repo 1.
 
-This is currently work-in-progress.
+Repo 1 deliberately avoided using an LLM in order to make retrieval, refusal behaviour, and failure modes explicit and inspectable. That repo is now frozen.
 
-Repo 1 is intentionally frozen.
-This repository explores a single, controlled change: the reintroduction of a Large Language Model strictly as a transformation layer, while preserving deterministic behaviour, safety guardrails, and failure-aware design.
+---
 
-## Description
-Small, local, **bounded RAG** demo to help internal teams **navigate** (not interpret) ICO-style guidance by:
+## What this repo is about
 
-- retrieving relevant guidance sections from a **static local corpus**
-- producing a **grounded, advisory-only** summary
-- refusing inputs that ask for legal/compliance judgement or “what should we do” actions
+The goal here is simple:
 
-## Non-goals (hard constraints)
+> Understand where an LLM adds value in a regulated guidance-navigation system, and where it starts to introduce new risks or ambiguity.
 
-This project is **not**:
+The domain, corpus, and advisory posture are held constant.
+Only the use of an LLM changes.
 
-- legal advice
-- a compliance decision engine
-- a policy interpretation engine
-- a production platform (no UI, auth, telemetry, scaling, etc.)
+---
 
-## Safety posture (high level)
+## Intended use of the LLM
 
-- **Retrieval-first:** synthesis is grounded in retrieved sections only.
-- **Deterministic refusal:** questions that require legal interpretation, compliance judgement, or action recommendations are refused.
-- **Explicit limitations:** every response includes limitations; refusal returns `confidence="very_low"` and `relevant_sections=[]`.
-- **No network fetch:** the corpus is local and static for this demo.
+If used, the LLM is **strictly downstream of retrieval** and may be used only for:
 
-## Corpus (important)
+* paraphrasing retrieved guidance
+* summarising retrieved text
+* ordering or grouping retrieved passages
+* improving readability or tone
 
-The corpus in `app/corpus/` is:
+The LLM is not used for:
 
-- **static** (checked into the repo; no live fetching/scraping)
-- **partial and illustrative** (intentionally small; not complete)
-- written to resemble real guidance language for retrieval/synthesis evaluation
+* relevance determination
+* scope expansion
+* ambiguity or conflict resolution
+* advice or recommendations
+* compliance or legal judgement
 
-Do not treat the corpus as authoritative source text for real decisions.
+---
 
-## Run
+## Behavioural modes
 
-```bash
-python3 -m app.cli "your question"
-```
+* **Deterministic mode**
+  Identical to Repo 1. No LLM involvement. Serves as a baseline.
 
-## Output contract
+* **LLM-assisted mode**
+  Retrieval and refusal logic remain deterministic.
+  The LLM operates only on already-retrieved text.
 
-All outputs conform to the PRS JSON shape:
+---
 
-```json
-{
-  "summary": "string",
-  "relevant_sections": [{"title": "string", "why_relevant": "string"}],
-  "limitations": ["string"],
-  "confidence": "very_low | low | medium | high"
-}
-```
+## What this repo does not aim to do
+
+* Build an agentic system
+* Introduce autonomy or planning
+* Add UI, authentication, or deployment
+* Optimise for scale or performance
+* Evolve into a product
+
+This is an exploration repo, not a production system.
