@@ -69,6 +69,10 @@ The system operates in two explicit modes:
 
 The LLM is downstream of correctness, not upstream of truth.
 
+### Current implementation state
+- The LLM post-retrieval transformer is **not yet implemented**; runtime behaviour today is identical to Mode A.
+- Any future activation of Mode B will remain bounded to paraphrase/summarise retrieved text only.
+
 ---
 
 ## Risks Under Examination
@@ -81,6 +85,7 @@ Repo 2 intentionally surfaces new risks introduced by LLM use, including:
 - Boundary erosion (answering instead of restating)
 
 Mitigation is optional; recognition and documentation are mandatory.
+These risks will be re-evaluated once the LLM transformer is introduced and exercised.
 
 ---
 

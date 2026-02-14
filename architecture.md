@@ -9,8 +9,13 @@ flowchart TD
     T --> M[Deterministic Retrieval<br/>Keyword & Regex Matching]
 
     M -->|No / Weak Matches| L[Failure Handler<br/>Explicit Limitations<br/>confidence = very_low]
-    M -->|Relevant Sections| S[Bounded Synthesis<br/>Extractive Summary Only]
+    M -->|Relevant Sections| S[Bounded Synthesis<br/>Extractive summary only]
 
-    S --> O[Structured JSON Output<br/>Summary<br/>Relevant Sections<br/>Limitations<br/>Confidence]
+    S -->|Mode A (current)| O[Structured JSON Output<br/>Summary<br/>Relevant Sections<br/>Limitations<br/>Confidence]
+    S -->|Mode B (planned)| X[Post-Retrieval LLM<br/>Paraphrase / summarise retrieved text]
+    X --> O
     L --> O
     R --> O
+```
+
+_Mode B (LLM-assisted) is planned and not yet wired into the pipeline. Retrieval, guardrails, and refusal stay deterministic in both modes._
