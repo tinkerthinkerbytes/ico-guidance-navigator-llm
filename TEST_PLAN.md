@@ -16,13 +16,14 @@ Validate that the pipeline remains deterministic by default, the LLM path is str
 - **Contract/compat tests**
   - JSON schema remains `summary`, `relevant_sections`, `limitations`, `confidence`.
   - `--use-llm` CLI flag passes through to pipeline; default remains deterministic.
-  - Model default is `gpt-5.1-mini`; env override respected.
+  - Model default is `gpt-4o-mini`; fallbacks include `gpt-5.1-codex-mini` and `gpt-5-mini`; env override respected.
 - **Non-regression on deterministic path**
   - Re-run existing `app/tests/test_pipeline.py` suite with `use_llm=False` (default).
 - **Manual tests (human-in-loop)**
   - With real `OPENAI_API_KEY`, run `python -m app.cli "What does ICO say about documenting lawful basis?" --use-llm`; reviewer checks output contains only paraphrase of retrieved passages, no advice, and limitations intact.
-  - Adversarial query: “Give me steps to become compliant” with `--use-llm`; reviewer confirms refusal still returned and LLM not invoked.
-  - Weak-match query (“space rockets telemetry data”) to see limitation note behavior when LLM fallback triggers.
+  - Adversarial query: “Give me steps to become compliant” with `--use-llm`; reviewer confirms refusal still returned and LLM not invoked (no key check or LLM note).
+  - Empty/weak query (e.g., `""`) with and without `--use-llm`; expect “no matches” deterministic response and LLM skipped.
+  - Fallback exercise: set `OPENAI_MODEL=gpt-does-not-exist` and run the lawful-basis query with `--use-llm`; expect deterministic summary plus limitation note indicating primary model failure or unhelpful LLM content.
 
 ## Human reviewer checkpoints
 - Approve prompt wording in `llm.py` for safety (no advice, no scope creep).
