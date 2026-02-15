@@ -24,7 +24,7 @@ class NavigatorPipeline:
                 matches.append(0)
             item.matched_paragraphs = matches
 
-    def run(self, question: str, top_k: int = 5) -> Dict:
+    def run(self, question: str, top_k: int = 5, use_llm: bool = False) -> Dict:
         if should_refuse(question):
             reason = "Cannot provide legal advice, compliance decisions, or action recommendations."
             return build_response([], refusal=True, refusal_reason=reason)
@@ -33,4 +33,5 @@ class NavigatorPipeline:
         # Drop weak/coverage-failed hits rather than presenting loosely-related sections as "relevant".
         retrieved = [r for r in retrieved if not r.coverage_weak]
         self._annotate_matches(retrieved, question)
-        return build_response(retrieved, refusal=False)
+        # use_llm remains opt-in; default False keeps current deterministic behaviour.
+        return build_response(retrieved, refusal=False, use_llm=use_llm)

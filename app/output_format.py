@@ -3,12 +3,14 @@ from typing import Dict, List
 from .models import RetrievedSection
 from .synthesis import build_summary, build_relevant_sections, build_limitations
 from .confidence import determine_confidence
+from .llm import summarise_with_llm
 
 
 def build_response(
     retrieved: List[RetrievedSection],
     refusal: bool,
     refusal_reason: str = "",
+    use_llm: bool = False,
 ) -> Dict:
     if refusal:
         return {
@@ -22,6 +24,12 @@ def build_response(
     relevant_sections = build_relevant_sections(retrieved)
     limitations = build_limitations(retrieved, refusal=False)
     confidence = determine_confidence(retrieved, refusal=False)
+
+    # Optional, bounded LLM paraphrase of the deterministic summary.
+    if use_llm:
+        summary, note = summarise_with_llm(retrieved, summary)
+        if note:
+            limitations.append(note)
 
     return {
         "summary": summary,
