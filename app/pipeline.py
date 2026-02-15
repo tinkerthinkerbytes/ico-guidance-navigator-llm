@@ -34,4 +34,4 @@ class NavigatorPipeline:
         retrieved = [r for r in retrieved if not r.coverage_weak]
         self._annotate_matches(retrieved, question)
         # use_llm remains opt-in; default False keeps current deterministic behaviour.
-        return build_response(retrieved, refusal=False, use_llm=use_llm)
+        return build_response(retrieved, refusal=False, use_llm=use_llm, question=question)

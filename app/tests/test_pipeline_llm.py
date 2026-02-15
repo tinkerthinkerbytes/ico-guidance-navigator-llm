@@ -50,6 +50,35 @@ class PipelineLLMTests(TestCase):
         self.assertEqual(llm_res["confidence"], baseline["confidence"])
         self.assertTrue(any("LLM summary failed" in l for l in llm_res["limitations"]))
 
+    @mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test", "OPENAI_MODEL": "gpt-5-mini"})
+    def test_llm_fallback_appends_note(self):
+        calls = {"count": 0}
+
+        def fake_urlopen(req, timeout=10):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.HTTPError(req.full_url, 404, "model not found", hdrs=None, fp=None)
+
+            class FakeResponse:
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, exc_type, exc, tb):
+                    return False
+
+                def read(self_inner, *args, **kwargs):
+                    return fake_response_body("LLM fallback summary")
+
+            return FakeResponse()
+
+        with mock.patch("urllib.request.urlopen", fake_urlopen):
+            res = self.pipeline.run(
+                "What does the guidance say about choosing and documenting a lawful basis before processing personal data?",
+                use_llm=True,
+            )
+        self.assertEqual(res["summary"], "LLM fallback summary")
+        self.assertTrue(any("LLM fallback used" in l for l in res["limitations"]))
+
     @mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test"})
     def test_refusal_does_not_invoke_llm(self):
         with mock.patch("urllib.request.urlopen", side_effect=AssertionError("LLM should not be called")):

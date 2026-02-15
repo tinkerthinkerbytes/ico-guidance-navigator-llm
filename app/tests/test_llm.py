@@ -43,13 +43,13 @@ class ExtractTextTests(TestCase):
 
 class SummariseWithLLMTests(TestCase):
     def test_missing_api_key_returns_note(self):
-        summary, note = llm.summarise_with_llm([make_retrieved()], "deterministic")
+        summary, note = llm.summarise_with_llm([make_retrieved()], "deterministic", "Q")
         self.assertEqual(summary, "deterministic")
         self.assertIn("missing OPENAI_API_KEY", note)
 
     @mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test"})
     def test_empty_retrieved_no_note(self):
-        summary, note = llm.summarise_with_llm([], "deterministic")
+        summary, note = llm.summarise_with_llm([], "deterministic", "Q")
         self.assertEqual(summary, "deterministic")
         self.assertIsNone(note)
 
@@ -71,7 +71,7 @@ class SummariseWithLLMTests(TestCase):
             conflict_flag=False,
             matched_paragraphs=[],
         )
-        summary, note = llm.summarise_with_llm([retrieved], "deterministic", api_key_env_var="KEY")
+        summary, note = llm.summarise_with_llm([retrieved], "deterministic", "Q", api_key_env_var="KEY")
         self.assertEqual(summary, "deterministic")
         self.assertIn("empty passages", note)
 
@@ -97,7 +97,7 @@ class SummariseWithLLMTests(TestCase):
             return FakeResponse()
 
         with mock.patch("urllib.request.urlopen", fake_urlopen):
-            summary, note = llm.summarise_with_llm([make_retrieved()], "deterministic")
+            summary, note = llm.summarise_with_llm([make_retrieved()], "deterministic", "Q")
         self.assertEqual(summary, "LLM summary")
         self.assertIsNone(note)
         req = captured["req"]
@@ -107,11 +107,76 @@ class SummariseWithLLMTests(TestCase):
         self.assertIn("Bearer test", req.headers.get("Authorization", ""))
         self.assertEqual(payload["model"], "gpt-5.1-chat-latest")
         self.assertIn("input", payload)
+        self.assertEqual(
+            payload["input"],
+            [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "input_text", "text": mock.ANY},
+                    ],
+                }
+            ],
+        )
         self.assertEqual(payload["max_output_tokens"], 200)
+
+    @mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test", "OPENAI_MODEL": "gpt-5-mini"})
+    def test_model_fallback_on_404(self):
+        calls = {"count": 0, "models": []}
+
+        def fake_urlopen(req, timeout=10):
+            calls["count"] += 1
+            payload = json.loads(req.data.decode("utf-8"))
+            calls["models"].append(payload["model"])
+            if calls["count"] == 1:
+                raise urllib.error.HTTPError(req.full_url, 404, "model not found", hdrs=None, fp=None)
+            resp_payload = json.dumps({"output_text": "Fallback summary"}).encode("utf-8")
+
+            class FakeResponse:
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, exc_type, exc, tb):
+                    return False
+
+                def read(self_inner, *args, **kwargs):
+                    return resp_payload
+
+            return FakeResponse()
+
+        with mock.patch("urllib.request.urlopen", fake_urlopen):
+            summary, note = llm.summarise_with_llm([make_retrieved()], "deterministic", "Q")
+        self.assertEqual(summary, "Fallback summary")
+        self.assertIn("LLM fallback used", note)
+        # First attempt primary, second attempt fallback.
+        self.assertEqual(calls["models"][0], "gpt-5-mini")
+        self.assertEqual(calls["models"][1], llm.FALLBACK_MODELS[0])
+
+    @mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test"})
+    def test_unhelpful_summary_discards_to_deterministic(self):
+        def fake_urlopen(req, timeout=10):
+            resp_payload = json.dumps({"output_text": "The provided passages do not contain an answer."}).encode("utf-8")
+
+            class FakeResponse:
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, exc_type, exc, tb):
+                    return False
+
+                def read(self_inner, *args, **kwargs):
+                    return resp_payload
+
+            return FakeResponse()
+
+        with mock.patch("urllib.request.urlopen", fake_urlopen):
+            summary, note = llm.summarise_with_llm([make_retrieved()], "deterministic", "Q")
+        self.assertEqual(summary, "deterministic")
+        self.assertEqual(note, "LLM summary discarded: unhelpful content")
 
     @mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test"})
     def test_network_error_falls_back(self):
         with mock.patch("urllib.request.urlopen", side_effect=urllib.error.URLError("boom")):
-            summary, note = llm.summarise_with_llm([make_retrieved()], "deterministic")
+            summary, note = llm.summarise_with_llm([make_retrieved()], "deterministic", "Q")
         self.assertEqual(summary, "deterministic")
         self.assertIn("LLM summary failed", note)

@@ -11,6 +11,7 @@ def build_response(
     refusal: bool,
     refusal_reason: str = "",
     use_llm: bool = False,
+    question: str = "",
 ) -> Dict:
     if refusal:
         return {
@@ -27,7 +28,7 @@ def build_response(
 
     # Optional, bounded LLM paraphrase of the deterministic summary.
     if use_llm:
-        summary, note = summarise_with_llm(retrieved, summary)
+        summary, note = summarise_with_llm(retrieved, summary, question)
         if note:
             limitations.append(note)
 
