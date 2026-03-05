@@ -1,6 +1,6 @@
-# ICO Guidance Navigator — LLM-Assisted Variant (WIP)
+# ICO Guidance Navigator — LLM-Assisted Variant
 
-> **Status:** Work in progress
+> **Status:** Completed and frozen (March 5, 2026)
 
 This repository is a continuation of the deterministic ICO guidance navigator built in Repo 1.
 
@@ -8,12 +8,12 @@ Repo 1 deliberately avoided using an LLM in order to make retrieval, refusal beh
 
 ---
 
-## Current implementation (today)
+## Current implementation
 
 * Pipeline runs deterministically by default; retrieval, refusal, and confidence are identical to Repo 1.
 * An **opt-in LLM paraphrase step** can be enabled via `--use-llm` (CLI) when `OPENAI_API_KEY` is set.
 * LLM usage is strictly post-retrieval and bounded to the retrieved passages; if LLM fails or returns unhelpful text, the deterministic summary is used with a limitation note.
-* Default model is `gpt-4o-mini`, with fallbacks (`gpt-5.1-codex-mini`, `gpt-5-mini`) if the primary is unavailable.
+* Default model is `gpt-4o-mini`; if model errors occur, fallback candidates are attempted in order (`gpt-5.1-codex-mini`, then `gpt-4o-mini`, de-duplicated against the selected primary).
 * Outputs follow the same structured JSON contract.
 
 ---
@@ -94,3 +94,15 @@ If the selected model is unavailable or the LLM returns an unhelpful message, th
 * Evolve into a product
 
 This is an exploration repo, not a production system.
+
+---
+
+## Completion decision
+
+This repository is considered done for its stated scope:
+
+* Deterministic and LLM-assisted paths are both implemented in bounded form.
+* Behavioural differences are observable without changing refusal/confidence logic.
+* Key risks introduced by LLM use are documented.
+
+See `FINDINGS_AND_RISKS.md` for a concise findings/risks write-up.

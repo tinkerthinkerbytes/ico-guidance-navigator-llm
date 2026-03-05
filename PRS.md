@@ -4,7 +4,7 @@
 ICO Guidance Navigator — LLM-Assisted Variant (Repo 2)
 
 ## Status
-Frozen
+Frozen (completed)
 
 ## Purpose
 
@@ -70,8 +70,9 @@ The system operates in two explicit modes:
 The LLM is downstream of correctness, not upstream of truth.
 
 ### Current implementation state
-- The LLM post-retrieval transformer is **not yet implemented**; runtime behaviour today is identical to Mode A.
-- Any future activation of Mode B will remain bounded to paraphrase/summarise retrieved text only.
+- Mode A (deterministic) remains the default runtime behaviour.
+- Mode B is implemented as an opt-in post-retrieval transformer (`--use-llm`) and remains bounded to paraphrase/summarise retrieved text only.
+- LLM failures or unhelpful outputs degrade safely to deterministic summary plus limitation note.
 
 ---
 
@@ -85,7 +86,7 @@ Repo 2 intentionally surfaces new risks introduced by LLM use, including:
 - Boundary erosion (answering instead of restating)
 
 Mitigation is optional; recognition and documentation are mandatory.
-These risks will be re-evaluated once the LLM transformer is introduced and exercised.
+These risks have now been exercised and documented in `FINDINGS_AND_RISKS.md`.
 
 ---
 
@@ -110,3 +111,12 @@ This repository is considered complete when:
 - The learning objective is fully answered
 
 No further features are required beyond this point.
+
+### Completion decision
+
+As of March 5, 2026, the stopping condition is satisfied:
+- deterministic behaviour remains intact
+- bounded LLM value is demonstrable via opt-in mode
+- risks are explicitly documented
+
+Further development is out of scope unless the PRS is re-opened by human decision.
